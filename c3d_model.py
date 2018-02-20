@@ -9,6 +9,7 @@ dim_ordering issue:
 - 'tf'-style dim_ordering: [batch, depth, height, width, channels]
 '''
 
+#Original model
 def get_model(summary=False, backend='tf'):
     """ Return the Keras model of the network
     """

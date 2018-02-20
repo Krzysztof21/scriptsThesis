@@ -37,8 +37,7 @@ vidNamesFileName = 'Vivaset/dynamic_gestures/trainData.txt'
 labelsFileName = 'Vivaset/dynamic_gestures/trainLabels.txt'
 videosFolder = 'Vivaset/dynamic_gestures/'
 
-useSavedWeights = True #True to use weightsFileName, False to initialize randomly
-weightsFileName = 'weights/weights.h5' 
+weightsFileName = 'weights/weights.h5'
 
 dim_ordering = K.image_dim_ordering()
 print ("[Info] image_dim_order (from default ~/.keras/keras.json)={}".format(dim_ordering))
@@ -169,19 +168,15 @@ def main():
     
 
     # Loading model weights 
-    if useSavedWeights == True:
-		print("[Info] Loading model weights...")
-		model.load_weights(weightsFileName, by_name=True)
-		print("[Info] Loading model weights -- DONE!")
+	print("[Info] Loading model weights...")
+	model.load_weights(weightsFileName, by_name=True)
+	print("[Info] Loading model weights -- DONE!")
    
 	# Model compilation with stochastic gradient descent and metrics	
     sgd = optimizers.SGD(lr, decay)
     model.compile(loss='mean_squared_error', optimizer = sgd, metrics = [metrics.top_k_categorical_accuracy, metrics.categorical_accuracy])
     
 	
-
-    
-    
     #Read filenames to array 
     f = open(str(vidNamesFileName))
     vidnames = f.readlines()
@@ -199,15 +194,13 @@ def main():
 	#Directories for logs and plots 
 	now = datetime.datetime.now()
 	logfolder = 'logs/' +str(numvids) +'_' +str(epochs) +'_' +str(batch_size) +'_' +str(lr) +now.strftime("_%Y-%m-%d_%H%M")
-    picfolder = 'pics/' +str(numvids) +'_' +str(epochs) +'_' +str(batch_size) +'_' +str(lr) +now.strftime("_%Y-%m-%d_%H%M")
     os.makedirs(logfolder)
-    os.makedirs(picfolder)    
     print(logfolder) 
 	log = open(str(logfolder) +'/log.txt', 'w')
 	vids = [0] * numvids
 		
     
-    #Loading videos to memory  
+    #Loading videos to memory 
 	for i in range(numvids):
 		print(i)
 		vidname = vidnames[i ].replace("\n","").replace("\r","")
@@ -250,82 +243,18 @@ def main():
 		vids[i] = np.array(X, dtype=np.float32)
 	
 	
-	checkpoint = callbacks.ModelCheckpoint(filepath = logfolder +'/weights.h5',  save_weights_only=True, period=1)
-	
-	#Training
-	output = model.fit(np.array(vids), np.array(labels), batch_size, epochs, validation_split=valsplit, callbacks = [checkpoint], initial_epoch=0)
-	log.write('Training: \n')
-
 	#Evaluation
-	#output = model.evaluate(np.array(vids), np.array(labels), batch_size=1)		
-	#log.write('Evaluation: \n')
-	#log.write(str(output))
-	#print(str(output))
-	
+	output = model.evaluate(np.array(vids), np.array(labels), batch_size=1)		
+	log.write('Evaluation: \n')
+	log.write(str(output))
+	print(str(output))
+
 	log.write('\nSamples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +' Epochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
 	log.write('\nWith weights: ' +model_weight_filename)
 	log.write(now.strftime("%Y-%m-%d %H:%M"))        	
 	log.write(str(output.history))
 
 	
-	# P L O T S
-	##############################################################################
-	
-	# summarize history for accuracy
-	plt.figure(1)
-	plt.plot(output.history['top_k_categorical_accuracy'])
-	plt.title('Top 5 accuracy for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('accuracy')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot1.png')
-	
-	#summarize history for accuracy
-	plt.figure(2)
-	plt.plot(output.history['categorical_accuracy'])
-	plt.title('Accuracy for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('accuracy')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot2.png')
-	
-
-	# summarize history for loss
-	plt.figure(3)
-	plt.plot(output.history['loss'])
-	plt.title('Loss for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('loss')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot3.png')  
-	
-	# summarize history for loss
-	plt.figure(4)
-	plt.plot(output.history['val_loss'])
-	plt.title('Val loss for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('loss')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot4.png') 
-	
-	# summarize history for accuracy
-	plt.figure(5)
-	plt.plot(output.history['val_categorical_accuracy'])
-	plt.title('Val accuracy for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('accuracy')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot5.png')
-
-
-	#summarize hisotry for validation accuracy
-	plt.figure(6)
-	plt.plot(output.history['val_top_k_categorical_accuracy'])
-	plt.title('Val top 5 accuracy for: samples: ' +str(numvids) +' in this validation:' +str(numvids*valsplit) +'\nEpochs: ' +str(epochs) +' Batch size:  ' +str(batch_size) +' Learning rate: ' +str(lr) +' ')
-	plt.ylabel('accuracy')
-	plt.xlabel('epoch')
-	plt.legend(['train', 'test'], loc='upper left')
-	plt.savefig(picfolder +'/plot6.png')
 	
 	end = time.time()
 	print('Time of execution: ' +str((end-start)/60))

@@ -10,6 +10,7 @@ dim_ordering issue:
 - 'tf'-style dim_ordering: [batch, depth, height, width, channels]
 '''
 
+#New model with batch normalization and different dropout
 def get_model(summary=False, backend='tf'):
     """ Return the Keras model of the network
     """
@@ -31,22 +32,11 @@ def get_model(summary=False, backend='tf'):
     # 3rd layer group
     model.add(Convolution3D(256, 3, 3, 3, activation='relu',
                             border_mode='same', name='conv3a', trainable=True))
-    #model.add(Convolution3D(256, 3, 3, 3, activation='relu',
-     #                       border_mode='same', name='conv3b', trainable=False))
     model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2),
                            border_mode='valid', name='pool3', dim_ordering= 'tf', trainable=False))
     # 4th layer group
-    #model.add(Convolution3D(512, 3, 3, 3, activation='relu',
-    #                        border_mode='same', name='conv4a', trainable=False))
-    #model.add(Convolution3D(512, 3, 3, 3, activation='relu',
-    #                        border_mode='same', name='conv4b', trainable=False))
-    #model.add(MaxPooling3D(pool_size=(2, 2, 2), strides=(2, 2, 2),
-    #                       border_mode='valid', name='pool4', trainable=False))
-    # 5th layer group
     model.add(Convolution3D(512, 3, 3, 3, activation='relu',
                             border_mode='same', name='conv5a', trainable=False))
-    #model.add(Convolution3D(512, 3, 3, 3, activation='relu',
-    #                        border_mode='same', name='conv5b', trainable=False))
     model.add(ZeroPadding3D(padding=((0, 0), (0, 2), (0, 2)), name='zeropad5'))
     model.add(MaxPooling3D(pool_size=(2, 4, 4), strides=(2, 4, 4),
                            border_mode='valid', name='pool5', trainable=False))
